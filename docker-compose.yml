@@ -1,0 +1,64 @@
+services:
+  # 1. Base de datos PostgreSQL
+  db:
+    image: postgres:16-alpine
+    container_name: helpflow-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-helpflow_db}
+      POSTGRES_USER: ${POSTGRES_USER:-finalHelpFlow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-12345}
+    ports:
+      - "${POSTGRES_PORT:-5436}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-finalHelpFlow} -d ${POSTGRES_DB:-helpflow_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - helpflow-network
+
+  # 2. Microservicio simulado de despacho tecnico (Liviano)
+  technician-dispatch-service:
+    build:
+      context: ./technician-dispatch-service
+      dockerfile: Dockerfile
+    container_name: helpflow-dispatch-service
+    restart: on-failure
+    ports:
+      - "${TECHNICIAN_DISPATCH_PORT:-8081}:8081"
+    networks:
+      - helpflow-network
+
+  # 3. Microservicio principal de Tickets de Soporte
+  support-ticket-service:
+    build:
+      context: ./support-ticket-service
+      dockerfile: Dockerfile
+    container_name: helpflow-ticket-service
+    restart: on-failure
+    depends_on:
+      db:
+        condition: service_healthy
+      technician-dispatch-service:
+        condition: service_started
+    ports:
+      - "${SUPPORT_TICKET_PORT:-8080}:8080"
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://db:5432/helpflow_db}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-finalHelpFlow}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-12345}
+      JWT_SECRET: ${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+      TECHNICIAN_DISPATCH_SERVICE_URL: ${TECHNICIAN_DISPATCH_SERVICE_URL:-http://technician-dispatch-service:8081}
+    networks:
+      - helpflow-network
+
+volumes:
+  postgres_data:
+
+networks:
+  helpflow-network:
+    driver: bridge
