@@ -30,7 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-// Pruebas unitarias para el servicio de autenticacion y registro
+// Pruebas unitarias para el servicio de autenticación y registro
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
@@ -63,6 +63,7 @@ class AuthServiceTest {
         sampleUser.setStatus(UserStatus.ACTIVO);
     }
 
+    // CASO FELIZ: Registro exitoso cuando todos los datos y el correo corporativo son válidos
     @Test
     void register_ShouldSaveUser_WhenDataIsValid() {
         RegisterUserCommand command = new RegisterUserCommand(
@@ -89,6 +90,7 @@ class AuthServiceTest {
         verify(userRepositoryPort).save(any(User.class));
     }
 
+    // CASO DE ERROR: Rechazar registro cuando el documento ya existe en la base de datos
     @Test
     void register_ShouldThrowException_WhenDocumentAlreadyExists() {
         RegisterUserCommand command = new RegisterUserCommand(
@@ -108,6 +110,7 @@ class AuthServiceTest {
         assertThrows(BusinessRuleException.class, () -> authService.register(command));
     }
 
+    // CASO FELIZ: Autenticación exitosa y generación de token JWT con credenciales correctas
     @Test
     void authenticate_ShouldReturnToken_WhenCredentialsAreValid() {
         LoginCommand command = new LoginCommand("juan.perez@helpflow.com", "12345");
@@ -123,6 +126,7 @@ class AuthServiceTest {
         assertEquals(1L, response.userId());
     }
 
+    // CASO LÍMITE / ERROR: Bloqueo de inicio de sesión si el usuario se encuentra en estado INACTIVO
     @Test
     void authenticate_ShouldThrowException_WhenUserIsInactive() {
         sampleUser.setStatus(UserStatus.INACTIVO);

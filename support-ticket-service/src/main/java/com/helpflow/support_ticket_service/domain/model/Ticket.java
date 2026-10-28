@@ -41,7 +41,7 @@ public class Ticket {
         this.slaDeadline = slaDeadline;
     }
 
-    // Calcula la fecha limite sumando las horas de la prioridad
+    // Calcula la fecha límite sumando las horas de la prioridad
     public static LocalDateTime calculateSlaDeadline(LocalDateTime start, TicketPriority priority) {
         if (start == null || priority == null) {
             return LocalDateTime.now().plusHours(24);
@@ -49,7 +49,7 @@ public class Ticket {
         return start.plusHours(priority.getSlaHours());
     }
 
-    // Revisa si una transicion de estado es valida en el flujo del sistema
+    // Revisa si una transición de estado es válida en el flujo del sistema
     public boolean canTransitionTo(TicketStatus targetStatus) {
         if (this.status == null || targetStatus == null) {
             return false;
@@ -67,7 +67,7 @@ public class Ticket {
         };
     }
 
-    // Revisa si ya vencio el tiempo de SLA
+    // Revisa si ya venció el tiempo de SLA
     public boolean isSlaBreached() {
         if (this.slaDeadline == null) {
             return false;
@@ -75,7 +75,7 @@ public class Ticket {
         return LocalDateTime.now().isAfter(this.slaDeadline) && !isFinished();
     }
 
-    // Revisa si esta proximo a vencer (por ejemplo en menos de 2 horas)
+    // Revisa si está próximo a vencer (por ejemplo en menos de 2 horas)
     public boolean isNearSlaBreach(int warningHours) {
         if (this.slaDeadline == null || isFinished()) {
             return false;

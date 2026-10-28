@@ -1,0 +1,1030 @@
+{
+  "info": {
+    "_postman_id": "497a50f9-c825-4a18-bf75-e3b274c67e7e",
+    "name": "HelpFlow TI - Sistema Integral de Soporte",
+    "description": "Colección completa de pruebas para el Sistema Integral de Gestión de Soporte TI (Módulo 6: Arquitectura Hexagonal, JWT, JPA, Observabilidad y Microservicios)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "dispatchUrl",
+      "value": "http://localhost:8081",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tecnico_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "usuario_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "createdTicketId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Autenticación y Usuarios",
+      "item": [
+        {
+          "name": "1.1 Registrar Usuario Válido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Usuario registrado con correo HelpFlow\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.email).to.include('@helpflow.com');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"document\": \"1098765432\",\n  \"name\": \"Camila Morales\",\n  \"email\": \"camila@helpflow.com\",\n  \"password\": \"12345\",\n  \"role\": \"ROLE_USUARIO\",\n  \"location\": \"SEDE_CENTRAL\",\n  \"department\": \"CONTABILIDAD\",\n  \"salary\": 2900000.0,\n  \"affiliationDate\": \"2024-04-01\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.2 Login Administrador (Guarda admin_token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var data = pm.response.json();",
+                  "pm.collectionVariables.set(\"admin_token\", data.token);",
+                  "pm.collectionVariables.set(\"jwt_token\", data.token);",
+                  "if (pm.environment) {",
+                  "    pm.environment.set(\"admin_token\", data.token);",
+                  "    pm.environment.set(\"jwt_token\", data.token);",
+                  "}",
+                  "pm.test(\"Token JWT recibido con rol ROLE_ADMIN\", function () {",
+                  "    pm.expect(data.token).to.not.be.empty;",
+                  "    pm.expect(data.role).to.eql('ROLE_ADMIN');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@helpflow.com\",\n  \"password\": \"12345\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.3 Login Técnico (Guarda tecnico_token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var data = pm.response.json();",
+                  "pm.collectionVariables.set(\"tecnico_token\", data.token);",
+                  "if (pm.environment) {",
+                  "    pm.environment.set(\"tecnico_token\", data.token);",
+                  "}",
+                  "pm.test(\"Token recibido con rol ROLE_TECNICO\", function () {",
+                  "    pm.expect(data.role).to.eql('ROLE_TECNICO');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"andres@helpflow.com\",\n  \"password\": \"12345\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.4 Login Usuario Solicitante (Guarda usuario_token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var data = pm.response.json();",
+                  "pm.collectionVariables.set(\"usuario_token\", data.token);",
+                  "if (pm.environment) {",
+                  "    pm.environment.set(\"usuario_token\", data.token);",
+                  "}",
+                  "pm.test(\"Token recibido con rol ROLE_USUARIO\", function () {",
+                  "    pm.expect(data.role).to.eql('ROLE_USUARIO');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"mateo@helpflow.com\",\n  \"password\": \"12345\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Gestión de Tickets (Flujo Principal)",
+      "item": [
+        {
+          "name": "2.1 Crear Ticket (Usuario Solicitante)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var data = pm.response.json();",
+                  "pm.collectionVariables.set(\"createdTicketId\", data.id);",
+                  "if (pm.environment) {",
+                  "    pm.environment.set(\"createdTicketId\", data.id);",
+                  "}",
+                  "pm.test(\"Ticket creado con cálculo de SLA y técnico asignado\", function () {",
+                  "    pm.expect(data.id).to.be.a('number');",
+                  "    pm.expect(data.slaDeadline).to.not.be.null;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{usuario_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Falla en impresora de tesorer\\u00eda\",\n  \"description\": \"La impresora l\\u00e1ser de cheques presenta atasco repetitivo en el alimentador principal.\",\n  \"category\": \"HARDWARE\",\n  \"priority\": \"ALTA\",\n  \"location\": \"SEDE_CENTRAL\",\n  \"affectedAsset\": \"PRN-TES-04\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.2 Listar Tickets (Permitidos según rol)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Respuesta es un array de tickets\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.3 Consultar Ticket por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Ticket obtenido con ID correcto\", function () {",
+                  "    var data = pm.response.json();",
+                  "    pm.expect(data.id).to.eql(parseInt(pm.collectionVariables.get(\"createdTicketId\")));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{createdTicketId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{createdTicketId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.4 Transición de Estado a EN_PROGRESO (Técnico / Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Estado cambiado a EN_PROGRESO\", function () {",
+                  "    var data = pm.response.json();",
+                  "    pm.expect(data.status).to.eql(\"EN_PROGRESO\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetStatus\": \"EN_PROGRESO\",\n  \"observations\": \"Iniciando diagn\\u00f3stico t\\u00e9cnico y apertura de chasis para revisi\\u00f3n de rodillos.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{createdTicketId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{createdTicketId}}",
+                "status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.5 Transición de Estado a RESUELTO (Técnico / Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Estado cambiado a RESUELTO\", function () {",
+                  "    var data = pm.response.json();",
+                  "    pm.expect(data.status).to.eql(\"RESUELTO\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetStatus\": \"RESUELTO\",\n  \"observations\": \"Se reemplaz\\u00f3 el kit de rodillos de arrastre. Impresi\\u00f3n de prueba satisfactoria.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{createdTicketId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{createdTicketId}}",
+                "status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.6 Reasignar Ticket a otro Técnico (Solo Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Técnico reasignado correctamente\", function () {",
+                  "    var data = pm.response.json();",
+                  "    pm.expect(data.assigneeId).to.eql(3);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newAssigneeId\": 3,\n  \"observations\": \"Reasignado a Santiago Henao especialista en HARDWARE en Sede Central.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{createdTicketId}}/reassign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{createdTicketId}}",
+                "reassign"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.7 Consultar Historial y Auditoría del Ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Historial contiene registros con observaciones\", function () {",
+                  "    var data = pm.response.json();",
+                  "    pm.expect(data).to.be.an('array');",
+                  "    pm.expect(data.length).to.be.at.least(1);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{createdTicketId}}/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{createdTicketId}}",
+                "history"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.8 Escalar Tickets Próximos a Vencer SLA (Solo Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Respuesta contiene conteo de tickets escalados\", function () {",
+                  "    var data = pm.response.json();",
+                  "    pm.expect(data.ticketsEscalados).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/escalate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "escalate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Microservicio technician-dispatch-service",
+      "item": [
+        {
+          "name": "3.1 Consultar Disponibilidad Técnica Determinista",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Respuesta contiene técnico y tiempo estimado determinista\", function () {",
+                  "    var data = pm.response.json();",
+                  "    pm.expect(data.ticketId).to.eql(125);",
+                  "    pm.expect(data.tecnicoId).to.not.be.empty;",
+                  "    pm.expect(data.disponibilidad).to.be.oneOf(['ALTA', 'MEDIA', 'BAJA']);",
+                  "    pm.expect(data.tiempoEstimadoHoras).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ticketId\": 125,\n  \"categoria\": \"RED\",\n  \"prioridad\": \"ALTA\"\n}"
+            },
+            "url": {
+              "raw": "{{dispatchUrl}}/technician-dispatch",
+              "host": [
+                "{{dispatchUrl}}"
+              ],
+              "path": [
+                "technician-dispatch"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Observabilidad y Métricas",
+      "item": [
+        {
+          "name": "4.1 Actuator Health (Verificar estado del sistema)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Sistema y base de datos en estado UP\", function () {",
+                  "    var data = pm.response.json();",
+                  "    pm.expect(data.status).to.eql('UP');",
+                  "    pm.expect(data.components.db.status).to.eql('UP');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/actuator/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "4.2 Actuator Info",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/actuator/info",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "info"
+              ]
+            }
+          }
+        },
+        {
+          "name": "4.3 Listado de Métricas Actuator",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Lista de nombres de métricas presente\", function () {",
+                  "    var data = pm.response.json();",
+                  "    pm.expect(data.names).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/actuator/metrics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "metrics"
+              ]
+            }
+          }
+        },
+        {
+          "name": "4.4 Métrica Micrometer (Tickets Incumplidos SLA)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Métrica personalizada presente con mediciones\", function () {",
+                  "    var data = pm.response.json();",
+                  "    pm.expect(data.name).to.eql('helpflow_tickets_breached_sla_total');",
+                  "    pm.expect(data.measurements).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/actuator/metrics/helpflow_tickets_breached_sla_total",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "metrics",
+                "helpflow_tickets_breached_sla_total"
+              ]
+            }
+          }
+        },
+        {
+          "name": "4.5 Métricas Formato Prometheus",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Contiene métricas estándar de Prometheus\", function () {",
+                  "    pm.expect(pm.response.text()).to.include('helpflow');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/actuator/prometheus",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "prometheus"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Casos de Error y Validaciones RFC 7807",
+      "item": [
+        {
+          "name": "5.1 Error 400 - Correo inválido (no corporativo @helpflow.com)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Formato RFC 7807 ProblemDetail devuelto\", function () {",
+                  "    var data = pm.response.json();",
+                  "    pm.expect(data.status).to.eql(400);",
+                  "    pm.expect(data.title).to.include('validación');",
+                  "    pm.expect(data.invalidFields).to.have.property('email');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"document\": \"1055443322\",\n  \"name\": \"Usuario Externo\",\n  \"email\": \"usuario@gmail.com\",\n  \"password\": \"12345\",\n  \"role\": \"ROLE_USUARIO\",\n  \"location\": \"SEDE_CENTRAL\",\n  \"department\": \"VENTAS\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "5.2 Error 400 - Transición de estado inválida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"RFC 7807 con detalle de regla de transición\", function () {",
+                  "    var data = pm.response.json();",
+                  "    pm.expect(data.status).to.eql(400);",
+                  "    pm.expect(data.title).to.eql('Regla de negocio inválida');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetStatus\": \"CERRADO\",\n  \"observations\": \"Intentando cerrar directamente sin haber pasado por resuelto.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tickets/6/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "6",
+                "status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "5.3 Error 401 - Petición sin token JWT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ]
+            }
+          }
+        },
+        {
+          "name": "5.4 Error 403 - Usuario normal intentando reasignar ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "pm.test(\"RFC 7807 con Acceso Denegado\", function () {",
+                  "    var data = pm.response.json();",
+                  "    pm.expect(data.status).to.eql(403);",
+                  "    pm.expect(data.title).to.eql('Acceso denegado');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{usuario_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newAssigneeId\": 3,\n  \"observations\": \"Intento no autorizado de reasignaci\\u00f3n\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tickets/1/reassign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "1",
+                "reassign"
+              ]
+            }
+          }
+        },
+        {
+          "name": "5.5 Error 404 - Ticket inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404 Not Found\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test(\"RFC 7807 con Recurso no encontrado\", function () {",
+                  "    var data = pm.response.json();",
+                  "    pm.expect(data.status).to.eql(404);",
+                  "    pm.expect(data.title).to.eql('Recurso no encontrado');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/99999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "99999"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

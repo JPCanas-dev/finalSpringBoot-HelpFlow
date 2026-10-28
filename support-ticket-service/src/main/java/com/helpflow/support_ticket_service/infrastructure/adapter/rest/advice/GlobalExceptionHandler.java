@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-// Manejador global de excepciones con formato ProblemDetail RFC 7807 y metricas
+// Manejador global de excepciones con formato ProblemDetail RFC 7807 y métricas
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -59,9 +59,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidStateTransitionException.class)
     public ProblemDetail handleInvalidStateTransition(InvalidStateTransitionException ex, HttpServletRequest request) {
-        log.warn("Transicion de estado invalida: {}", ex.getMessage());
+        log.warn("Transición de estado inválida: {}", ex.getMessage());
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
-        problem.setTitle("Transicion de estado no permitida");
+        problem.setTitle("Transición de estado no permitida");
         problem.setType(URI.create("https://helpflow.com/errors/invalid-state-transition"));
         enrichProblemDetail(problem, request);
         return problem;
@@ -95,9 +95,9 @@ public class GlobalExceptionHandler {
             fieldErrors.put(error.getField(), error.getDefaultMessage());
         }
 
-        log.warn("Error de validacion en datos de entrada: {}", fieldErrors);
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Existen campos invalidos en la peticion");
-        problem.setTitle("Error de validacion");
+        log.warn("Error de validación en datos de entrada: {}", fieldErrors);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Existen campos inválidos en la petición");
+        problem.setTitle("Error de validación");
         problem.setType(URI.create("https://helpflow.com/errors/validation-failed"));
         problem.setProperty("invalidFields", fieldErrors);
         enrichProblemDetail(problem, request);
@@ -108,7 +108,7 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
         metricsAdapter.incrementAccessDenied();
         log.warn("Permisos insuficientes: {}", ex.getMessage());
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "No posee los permisos necesarios para realizar esta accion");
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "No posee los permisos necesarios para realizar esta acción");
         problem.setTitle("Acceso denegado");
         problem.setType(URI.create("https://helpflow.com/errors/access-denied"));
         enrichProblemDetail(problem, request);
@@ -118,9 +118,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ProblemDetail handleBadCredentials(BadCredentialsException ex, HttpServletRequest request) {
         metricsAdapter.incrementAuthFailure();
-        log.warn("Credenciales invalidas: {}", ex.getMessage());
+        log.warn("Credenciales inválidas: {}", ex.getMessage());
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Credenciales de acceso incorrectas");
-        problem.setTitle("Autenticacion fallida");
+        problem.setTitle("Autenticación fallida");
         problem.setType(URI.create("https://helpflow.com/errors/bad-credentials"));
         enrichProblemDetail(problem, request);
         return problem;

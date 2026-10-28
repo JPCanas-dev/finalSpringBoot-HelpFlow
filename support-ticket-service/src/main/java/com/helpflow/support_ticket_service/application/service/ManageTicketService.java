@@ -43,12 +43,12 @@ public class ManageTicketService implements ManageTicketPort {
     @Transactional
     public Ticket updateStatus(UpdateTicketStatusCommand command) {
         Ticket ticket = ticketRepositoryPort.findById(command.ticketId())
-                .orElseThrow(() -> new EntityNotFoundException("No se encontro el ticket con ID: " + command.ticketId()));
+                .orElseThrow(() -> new EntityNotFoundException("No se encontró el ticket con ID: " + command.ticketId()));
 
         User currentUser = userRepositoryPort.findById(command.currentUserId())
-                .orElseThrow(() -> new EntityNotFoundException("No se encontro el usuario con ID: " + command.currentUserId()));
+                .orElseThrow(() -> new EntityNotFoundException("No se encontró el usuario con ID: " + command.currentUserId()));
 
-        // Validar permisos segun rol
+        // Validar permisos según rol
         try {
             validatePermissionsForStatusChange(currentUser, ticket, command.targetStatus());
         } catch (UnauthorizedTicketAccessException ex) {
@@ -56,22 +56,22 @@ public class ManageTicketService implements ManageTicketPort {
             throw ex;
         }
 
-        // Validar transicion de estado de acuerdo a la maquina de estados
+        // Validar transición de estado de acuerdo a la máquina de estados
         if (!ticket.canTransitionTo(command.targetStatus())) {
-            throw new InvalidStateTransitionException("Transicion de estado no permitida: de " +
+            throw new InvalidStateTransitionException("Transición de estado no permitida: de " +
                     ticket.getStatus() + " a " + command.targetStatus());
         }
 
         TicketStatus previousStatus = ticket.getStatus();
         LocalDateTime now = LocalDateTime.now();
 
-        // Si pasa a RESUELTO, registramos metrica de tiempo de resolucion
+        // Si pasa a RESUELTO, registramos métrica de tiempo de resolución
         if (command.targetStatus() == TicketStatus.RESUELTO && ticket.getCreatedAt() != null) {
             Duration duration = Duration.between(ticket.getCreatedAt(), now);
             metricsAdapter.recordResolutionTime(duration);
         }
 
-        // Si pasa a EN_PROGRESO desde ABIERTO/ASIGNADO, registramos metrica de primera respuesta
+        // Si pasa a EN_PROGRESO desde ABIERTO/ASIGNADO, registramos métrica de primera respuesta
         if (command.targetStatus() == TicketStatus.EN_PROGRESO && ticket.getCreatedAt() != null) {
             Duration duration = Duration.between(ticket.getCreatedAt(), now);
             metricsAdapter.recordFirstResponseTime(duration);
@@ -103,7 +103,7 @@ public class ManageTicketService implements ManageTicketPort {
     @Transactional
     public Ticket reassignTicket(ReassignTicketCommand command) {
         User admin = userRepositoryPort.findById(command.adminUserId())
-                .orElseThrow(() -> new EntityNotFoundException("No se encontro el usuario administrador"));
+                .orElseThrow(() -> new EntityNotFoundException("No se encontró el usuario administrador"));
 
         // Solo administradores pueden reasignar tickets arbitrariamente
         if (!admin.isAdmin()) {
@@ -112,17 +112,17 @@ public class ManageTicketService implements ManageTicketPort {
         }
 
         Ticket ticket = ticketRepositoryPort.findById(command.ticketId())
-                .orElseThrow(() -> new EntityNotFoundException("No se encontro el ticket con ID: " + command.ticketId()));
+                .orElseThrow(() -> new EntityNotFoundException("No se encontró el ticket con ID: " + command.ticketId()));
 
         User newTech = userRepositoryPort.findById(command.newAssigneeId())
-                .orElseThrow(() -> new EntityNotFoundException("No se encontro el tecnico con ID: " + command.newAssigneeId()));
+                .orElseThrow(() -> new EntityNotFoundException("No se encontró el técnico con ID: " + command.newAssigneeId()));
 
         if (!newTech.isTechnician()) {
             throw new BusinessRuleException("El usuario asignado debe tener el rol ROLE_TECNICO");
         }
 
         if (!newTech.isActive()) {
-            throw new BusinessRuleException("No se puede asignar un ticket a un tecnico inactivo");
+            throw new BusinessRuleException("No se puede asignar un ticket a un técnico inactivo");
         }
 
         ticket.setAssigneeId(newTech.getId());
@@ -133,7 +133,7 @@ public class ManageTicketService implements ManageTicketPort {
 
         String observations = command.observations() != null && !command.observations().isBlank()
                 ? command.observations()
-                : "Ticket reasignado al tecnico: " + newTech.getName();
+                : "Ticket reasignado al técnico: " + newTech.getName();
 
         TicketHistory history = new TicketHistory(
                 null,
@@ -155,15 +155,15 @@ public class ManageTicketService implements ManageTicketPort {
             return;
         }
 
-        // Tecnico solo puede gestionar los tickets que tiene asignados
+        // Técnico solo puede gestionar los tickets que tiene asignados
         if (user.isTechnician()) {
             if (ticket.getAssigneeId() == null || !ticket.getAssigneeId().equals(user.getId())) {
-                throw new UnauthorizedTicketAccessException("El tecnico solo puede gestionar tickets asignados a su cuenta");
+                throw new UnauthorizedTicketAccessException("El técnico solo puede gestionar tickets asignados a su cuenta");
             }
             return;
         }
 
-        // Usuario solicitante solo puede cancelar su propio ticket o cerrarlo si ya esta resuelto
+        // Usuario solicitante solo puede cancelar su propio ticket o cerrarlo si ya está resuelto
         if (Role.ROLE_USUARIO.equals(user.getRole())) {
             if (!ticket.getRequesterId().equals(user.getId())) {
                 throw new UnauthorizedTicketAccessException("El usuario solo puede gestionar sus propios tickets");

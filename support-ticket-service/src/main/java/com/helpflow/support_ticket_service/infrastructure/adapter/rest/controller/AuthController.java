@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-// Controlador para autenticacion y registro de usuarios
+// Controlador para autenticación y registro de usuarios
 @RestController
 @RequestMapping("/auth")
-@Tag(name = "Autenticacion", description = "Endpoints para registro y login con JWT")
+@Tag(name = "Autenticación", description = "Endpoints para registro y login con JWT")
 public class AuthController {
 
     private final RegisterUserPort registerUserPort;
@@ -35,7 +35,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    @Operation(summary = "Registrar nuevo usuario o tecnico")
+    @Operation(summary = "Registrar nuevo usuario o técnico")
     public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
         RegisterUserCommand command = new RegisterUserCommand(
                 request.document(),
@@ -66,7 +66,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Iniciar sesion y obtener token JWT")
+    @Operation(summary = "Iniciar sesión y obtener token JWT")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginCommand command = new LoginCommand(request.email(), request.password());
         AuthResponse response = authenticateUserPort.authenticate(command);

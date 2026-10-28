@@ -10,7 +10,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-// DTOs para operaciones de autenticacion
+// DTOs para operaciones de autenticación
 public class AuthDto {
 
     public record RegisterRequest(
@@ -21,11 +21,11 @@ public class AuthDto {
             String name,
 
             @NotBlank(message = "El correo es obligatorio")
-            @Email(message = "El formato de correo no es valido")
+            @Email(message = "El formato de correo no es válido")
             @Pattern(regexp = "^[A-Za-z0-9._%+-]+@helpflow\\.com$", message = "El correo debe pertenecer al dominio @helpflow.com")
             String email,
 
-            @NotBlank(message = "La contrasena es obligatoria")
+            @NotBlank(message = "La contraseña es obligatoria")
             String password,
 
             Role role,
@@ -33,7 +33,7 @@ public class AuthDto {
             @NotBlank(message = "La sede es obligatoria")
             String location,
 
-            @NotBlank(message = "El departamento o area es obligatorio")
+            @NotBlank(message = "El departamento o área es obligatorio")
             String department,
 
             @PositiveOrZero(message = "El salario no puede ser negativo")
@@ -44,10 +44,10 @@ public class AuthDto {
 
     public record LoginRequest(
             @NotBlank(message = "El correo es obligatorio")
-            @Email(message = "El formato de correo no es valido")
+            @Email(message = "El formato de correo no es válido")
             String email,
 
-            @NotBlank(message = "La contrasena es obligatoria")
+            @NotBlank(message = "La contraseña es obligatoria")
             String password
     ) {}
 

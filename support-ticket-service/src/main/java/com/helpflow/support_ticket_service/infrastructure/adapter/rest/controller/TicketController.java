@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 
-// Controlador para la gestion integral de tickets
+// Controlador para la gestión integral de tickets
 @RestController
 @RequestMapping("/tickets")
 @Tag(name = "Tickets", description = "Endpoints para crear, consultar, asignar y escalar tickets")
@@ -59,7 +59,7 @@ public class TicketController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('USUARIO', 'ADMIN')")
-    @Operation(summary = "Crear nuevo ticket y ejecutar asignacion automatica")
+    @Operation(summary = "Crear nuevo ticket y ejecutar asignación automática")
     public ResponseEntity<TicketResponse> createTicket(
             @Valid @RequestBody CreateTicketRequest request,
             @AuthenticationPrincipal SecurityUser currentUser) {
@@ -79,7 +79,7 @@ public class TicketController {
     }
 
     @GetMapping
-    @Operation(summary = "Listar tickets permitidos segun el usuario autenticado")
+    @Operation(summary = "Listar tickets permitidos según el usuario autenticado")
     public ResponseEntity<List<TicketResponse>> getTickets(@AuthenticationPrincipal SecurityUser currentUser) {
         List<Ticket> tickets = getTicketPort.getTicketsForUser(currentUser.getId());
         List<TicketResponse> responses = tickets.stream().map(this::toResponse).toList();
@@ -116,7 +116,7 @@ public class TicketController {
 
     @PutMapping("/{id}/reassign")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Reasignar ticket a otro tecnico (solo administradores)")
+    @Operation(summary = "Reasignar ticket a otro técnico (solo administradores)")
     public ResponseEntity<TicketResponse> reassignTicket(
             @PathVariable Long id,
             @Valid @RequestBody ReassignTicketRequest request,
@@ -134,7 +134,7 @@ public class TicketController {
     }
 
     @GetMapping("/{id}/history")
-    @Operation(summary = "Consultar el historial de auditoria de un ticket")
+    @Operation(summary = "Consultar el historial de auditoría de un ticket")
     public ResponseEntity<List<TicketHistoryResponse>> getHistories(
             @PathVariable Long id,
             @AuthenticationPrincipal SecurityUser currentUser) {
@@ -149,7 +149,7 @@ public class TicketController {
 
     @PostMapping("/escalate")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Escalar manualmente tickets proximos a incumplir SLA")
+    @Operation(summary = "Escalar manualmente tickets próximos a incumplir SLA")
     public ResponseEntity<Map<String, Object>> escalateTickets() {
         int escalated = escalateTicketsPort.checkAndEscalateNearBreachTickets();
         return ResponseEntity.ok(Map.of(

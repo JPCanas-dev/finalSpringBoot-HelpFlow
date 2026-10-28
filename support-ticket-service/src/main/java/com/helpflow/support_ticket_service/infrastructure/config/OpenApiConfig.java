@@ -9,7 +9,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-// Configuracion de documentacion Swagger / OpenAPI con soporte para JWT
+// Configuración de documentación Swagger / OpenAPI con soporte para JWT
 @Configuration
 public class OpenApiConfig {
 

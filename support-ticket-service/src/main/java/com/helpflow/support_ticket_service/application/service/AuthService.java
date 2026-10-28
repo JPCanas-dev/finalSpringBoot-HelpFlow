@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
-// Servicio de autenticacion y registro de usuarios
+// Servicio de autenticación y registro de usuarios
 @Service
 public class AuthService implements RegisterUserPort, AuthenticateUserPort {
 
@@ -49,12 +49,12 @@ public class AuthService implements RegisterUserPort, AuthenticateUserPort {
             throw new BusinessRuleException("Ya existe un usuario registrado con el correo: " + command.email());
         }
 
-        // Formato basico de correo corporativo helpflow.com
+        // Formato básico de correo corporativo helpflow.com
         if (!command.email().endsWith("@helpflow.com")) {
             throw new BusinessRuleException("El correo debe pertenecer al dominio corporativo @helpflow.com");
         }
 
-        // Encriptar contrasena
+        // Encriptar contraseña
         String encodedPassword = passwordEncoderPort.encode(command.password());
 
         // Asignar rol por defecto si no viene
@@ -84,19 +84,19 @@ public class AuthService implements RegisterUserPort, AuthenticateUserPort {
 
         if (user == null) {
             metricsAdapter.incrementAuthFailure();
-            throw new EntityNotFoundException("Credenciales invalidas para el correo: " + command.email());
+            throw new EntityNotFoundException("Credenciales inválidas para el correo: " + command.email());
         }
 
-        // Verificar si el usuario esta activo
+        // Verificar si el usuario está activo
         if (!user.isActive()) {
             metricsAdapter.incrementAuthFailure();
             throw new UserInactiveException("El usuario se encuentra inactivo en el sistema");
         }
 
-        // Verificar contrasena
+        // Verificar contraseña
         if (!passwordEncoderPort.matches(command.password(), user.getPassword())) {
             metricsAdapter.incrementAuthFailure();
-            throw new BusinessRuleException("Credenciales invalidas");
+            throw new BusinessRuleException("Credenciales inválidas");
         }
 
         // Generar JWT

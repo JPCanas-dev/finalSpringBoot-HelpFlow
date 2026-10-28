@@ -50,7 +50,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-// Pruebas de integracion web para controladores REST, manejo de excepciones y DTOs
+// Pruebas de integración web para controladores REST, manejo de excepciones y DTOs
 @ExtendWith(MockitoExtension.class)
 class WebMvcIntegrationTest {
 
@@ -121,6 +121,7 @@ class WebMvcIntegrationTest {
                 .build();
     }
 
+    // CASO FELIZ: Registro HTTP 201 Created cuando el payload cumple Bean Validation
     @Test
     void registerUser_ShouldReturn201_WhenPayloadIsValid() throws Exception {
         RegisterRequest request = new RegisterRequest(
@@ -145,6 +146,7 @@ class WebMvcIntegrationTest {
                 .andExpect(jsonPath("$.document").value("1017234890"));
     }
 
+    // CASO DE ERROR / VALIDACIÓN: Rechazo HTTP 400 Bad Request en formato RFC 7807 cuando el correo no es @helpflow.com
     @Test
     void registerUser_ShouldReturnProblemDetail_WhenEmailIsInvalid() throws Exception {
         RegisterRequest request = new RegisterRequest(
@@ -163,10 +165,11 @@ class WebMvcIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.title").value("Error de validacion"))
+                .andExpect(jsonPath("$.title").value("Error de validación"))
                 .andExpect(jsonPath("$.invalidFields.email").exists());
     }
 
+    // CASO FELIZ: Creación HTTP 201 Created de ticket con autenticación y payload válido
     @Test
     void createTicket_ShouldReturn201_WhenPayloadIsValid() throws Exception {
         CreateTicketRequest request = new CreateTicketRequest(
@@ -200,6 +203,7 @@ class WebMvcIntegrationTest {
                 .andExpect(jsonPath("$.status").value("ASIGNADO"));
     }
 
+    // CASO FELIZ: Listado HTTP 200 OK de tickets permitidos para el usuario autenticado
     @Test
     void getTickets_ShouldReturnList_WhenAuthorized() throws Exception {
         Ticket ticket = new Ticket();
@@ -217,6 +221,7 @@ class WebMvcIntegrationTest {
                 .andExpect(jsonPath("$[0].title").value("Falla en router"));
     }
 
+    // CASO FELIZ: Actualización de estado HTTP 200 OK con observaciones técnicas
     @Test
     void updateTicketStatus_ShouldReturnUpdatedTicket() throws Exception {
         UpdateStatusRequest request = new UpdateStatusRequest(

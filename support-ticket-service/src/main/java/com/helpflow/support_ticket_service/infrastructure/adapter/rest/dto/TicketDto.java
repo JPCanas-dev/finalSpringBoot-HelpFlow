@@ -13,14 +13,14 @@ import java.time.LocalDateTime;
 public class TicketDto {
 
     public record CreateTicketRequest(
-            @NotBlank(message = "El titulo es obligatorio")
-            @Size(max = 150, message = "El titulo no puede superar 150 caracteres")
+            @NotBlank(message = "El título es obligatorio")
+            @Size(max = 150, message = "El título no puede superar 150 caracteres")
             String title,
 
-            @NotBlank(message = "La descripcion es obligatoria")
+            @NotBlank(message = "La descripción es obligatoria")
             String description,
 
-            @NotNull(message = "La categoria es obligatoria")
+            @NotNull(message = "La categoría es obligatoria")
             TicketCategory category,
 
             @NotNull(message = "La prioridad es obligatoria")
@@ -36,12 +36,12 @@ public class TicketDto {
             @NotNull(message = "El nuevo estado es obligatorio")
             TicketStatus targetStatus,
 
-            @NotBlank(message = "La observacion del cambio de estado es obligatoria")
+            @NotBlank(message = "La observación del cambio de estado es obligatoria")
             String observations
     ) {}
 
     public record ReassignTicketRequest(
-            @NotNull(message = "El ID del nuevo tecnico es obligatorio")
+            @NotNull(message = "El ID del nuevo técnico es obligatorio")
             Long newAssigneeId,
 
             String observations

@@ -31,7 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-// Pruebas unitarias para transiciones de estado y reasignacion de tickets
+// Pruebas unitarias para transiciones de estado y reasignación de tickets
 @ExtendWith(MockitoExtension.class)
 class ManageTicketServiceTest {
 
@@ -69,6 +69,7 @@ class ManageTicketServiceTest {
         ticket.setCreatedAt(LocalDateTime.now().minusHours(1));
     }
 
+    // CASO FELIZ: Transición válida a EN_PROGRESO cuando el técnico asignado realiza la actualización
     @Test
     void updateStatus_ShouldAdvanceToInProgress_WhenTechnicianIsOwner() {
         UpdateTicketStatusCommand command = new UpdateTicketStatusCommand(
@@ -86,6 +87,7 @@ class ManageTicketServiceTest {
         verify(ticketHistoryRepositoryPort).save(any(TicketHistory.class));
     }
 
+    // CASO DE ERROR / LÍMITE: Transición inválida de estados (de ASIGNADO no se puede saltar directamente a CERRADO)
     @Test
     void updateStatus_ShouldThrowException_WhenInvalidTransitionAttempted() {
         // De ASIGNADO no se puede saltar directamente a CERRADO
@@ -99,6 +101,7 @@ class ManageTicketServiceTest {
         assertThrows(InvalidStateTransitionException.class, () -> manageTicketService.updateStatus(command));
     }
 
+    // CASO DE ERROR / SEGURIDAD: Bloquear acceso si un técnico intenta gestionar un ticket que no tiene asignado
     @Test
     void updateStatus_ShouldThrowException_WhenTechnicianIsNotAssigned() {
         User otherTech = new User();
@@ -116,6 +119,7 @@ class ManageTicketServiceTest {
         verify(metricsAdapter).incrementAccessDenied();
     }
 
+    // CASO FELIZ: Reasignación de ticket permitida cuando la solicitud proviene de un Administrador (ROLE_ADMIN)
     @Test
     void reassignTicket_ShouldUpdateAssignee_WhenAdminRequests() {
         User admin = new User();

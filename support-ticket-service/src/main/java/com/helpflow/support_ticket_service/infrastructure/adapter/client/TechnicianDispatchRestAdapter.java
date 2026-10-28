@@ -28,7 +28,7 @@ public class TechnicianDispatchRestAdapter implements TechnicianDispatchPort {
                 .build();
     }
 
-    // DTO interno para enviar la peticion
+    // DTO interno para enviar la petición
     record DispatchRequestDto(Long ticketId, String categoria, String prioridad) {}
 
     // DTO interno para recibir la respuesta
@@ -66,7 +66,7 @@ public class TechnicianDispatchRestAdapter implements TechnicianDispatchPort {
             return Optional.of(suggestion);
 
         } catch (Exception e) {
-            // Si el servicio no responde o falla, no bloqueamos la creacion del ticket
+            // Si el servicio no responde o falla, no bloqueamos la creación del ticket
             log.warn("No fue posible comunicarse con technician-dispatch-service: {}", e.getMessage());
             return Optional.empty();
         }

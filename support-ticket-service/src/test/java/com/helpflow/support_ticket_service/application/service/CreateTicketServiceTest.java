@@ -34,7 +34,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-// Pruebas unitarias para creacion y asignacion automatica de tickets
+// Pruebas unitarias para creación y asignación automática de tickets
 @ExtendWith(MockitoExtension.class)
 class CreateTicketServiceTest {
 
@@ -77,6 +77,7 @@ class CreateTicketServiceTest {
         technician.setDocument("1020456789");
     }
 
+    // CASO FELIZ: Creación de ticket con despacho técnico exitoso, cálculo de SLA y auditoría
     @Test
     void createTicket_ShouldAssignTechnician_WhenEligibleTechExists() {
         CreateTicketCommand command = new CreateTicketCommand(
@@ -116,6 +117,7 @@ class CreateTicketServiceTest {
         verify(metricsAdapter).recordTicketCreated(TicketCategory.RED, TicketPriority.ALTA);
     }
 
+    // CASO LÍMITE / ERROR: Rechazar la creación de ticket si el usuario solicitante se encuentra INACTIVO
     @Test
     void createTicket_ShouldThrowException_WhenRequesterIsInactive() {
         requester.setStatus(UserStatus.INACTIVO);
