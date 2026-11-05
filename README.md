@@ -172,41 +172,77 @@ Registro de trazas con formato estructurado ISO 8601, niveles de severidad (`INF
 
 ---
 
-## 8. Despliegue con Docker y Docker Compose
+## 8. Despliegue y Ejecución
 
-### Requisitos:
-- Docker y Docker Compose instalados.
+### Opción A: Despliegue con Docker y Docker Compose (Recomendado)
 
-### Archivo de Entorno:
-Copie el archivo de ejemplo si no existe:
-```bash
-cp .env.example .env
-```
+#### Requisitos:
+- Docker Engine y Docker Compose instalados y en ejecución.
 
-### Iniciar los Servicios:
+#### 1. Configurar Variables de Entorno:
+Copia el archivo de plantilla `.env.example` para generar tu archivo `.env`:
+- **En Linux / macOS / PowerShell:**
+  ```bash
+  cp .env.example .env
+  ```
+- **En Windows (CMD):**
+  ```cmd
+  copy .env.example .env
+  ```
+> *Nota: Los valores por defecto en `.env.example` ya están listos para funcionar sin necesidad de cambios obligatorios.*
+
+#### 2. Iniciar los Servicios:
+Construye las imágenes e inicia los contenedores en segundo plano:
 ```bash
 docker compose up --build -d
 ```
 
-### Detener los Servicios:
+#### 3. Verificar el Estado y Logs:
+Comprueba que los contenedores (`helpflow-postgres`, `helpflow-dispatch-service`, `helpflow-ticket-service`) estén en ejecución y con estado saludable (*healthy*):
+```bash
+docker compose ps
+```
+
+Si deseas monitorear los logs en tiempo real:
+```bash
+docker compose logs -f
+```
+
+#### 4. Acceso a las Aplicaciones:
+* **API de Tickets & Swagger UI**: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+* **Microservicio Despacho Técnico**: [http://localhost:8081](http://localhost:8081)
+* **Base de Datos PostgreSQL**: `localhost:5436` (o el puerto configurado en `POSTGRES_PORT`)
+
+#### 5. Detener los Servicios:
 ```bash
 docker compose down
 ```
+*(Opcional: Si deseas eliminar también los volúmenes con los datos de prueba de la base de datos, usa `docker compose down -v`)*.
 
-### Ejecución Local sin Docker:
-1. Asegurarse de tener PostgreSQL corriendo en el puerto 5436 con la base de datos `helpflow_db`.
-2. Iniciar `technician-dispatch-service`:
+---
+
+### Opción B: Ejecución Local sin Docker
+
+1. **Base de Datos PostgreSQL:**
+   - Asegúrate de tener PostgreSQL corriendo localmente (por ejemplo, en el puerto `5436` con la base de datos `helpflow_db` creada).
+   - En tu archivo `.env`, asegúrate de que `SPRING_DATASOURCE_URL` apunte a `localhost` (ej: `jdbc:postgresql://localhost:5436/helpflow_db`).
+
+2. **Iniciar `technician-dispatch-service`:**
    ```bash
    cd technician-dispatch-service
    mvn spring-boot:run
    ```
-3. Iniciar `support-ticket-service`:
+
+3. **Iniciar `support-ticket-service`:**
    ```bash
    cd support-ticket-service
    mvn spring-boot:run
    ```
+
+---
+
 ## AUTOR
 
-**JUAN PABLO CAÑAS**<BR>
+**JUAN PABLO CAÑAS**<br>
 **RIWI CODER**<br>
 **GITHUB:** https://github.com/JPCanas-dev
